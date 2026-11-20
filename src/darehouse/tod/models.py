@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 class PromptType(Enum):
@@ -16,7 +16,7 @@ class Prompt:
 
 @dataclass
 class GameState:
-    players: list[Player] = []
-    last_prompts: list[Prompt] = []
+    players: list[Player] = field(default_factory=list)
+    last_prompts: list[Prompt] = field(default_factory=list)
     current_player_index: int = 0
     is_running: bool = False

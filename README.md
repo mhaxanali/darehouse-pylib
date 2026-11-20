@@ -20,7 +20,7 @@ pip install -e .
 pip install darehouse
 ```
 ## Documentation
-Project structure is documented @ [PROJECT_STRUCTURE.md](https://github.com/mhaxanali/darehouse-pylib/blob/main/PROJECT_STRUCTURE.md)
+Project structure is documented @ [PROJECT_STRUCTURE.md](https://github.com/mhaxanali/darehouse-pylib/blob/main/PROJECT_STRUCTURE.md) \
 For further and in-detail documentation for usage, check the `docs/` directory. \
 
 ## Author

@@ -21,7 +21,7 @@ pip install darehouse
 ```
 ## Documentation
 Project structure is documented @ [PROJECT_STRUCTURE.md](https://github.com/mhaxanali/darehouse-pylib/blob/main/PROJECT_STRUCTURE.md) \
-For further and in-detail documentation for usage, check the `docs/` directory. \
+For further and in-detail documentation for usage, check the `docs/` directory.
 
 ## Author
 [Muhammad Hasan](https://github.com/mhaxanali)

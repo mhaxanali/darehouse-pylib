@@ -16,7 +16,7 @@ class Prompt:
 
 @dataclass
 class GameState:
-    players: list[Player]
-    last_prompts: list[Prompt]
+    players: list[Player] = []
+    last_prompts: list[Prompt] = []
     current_player_index: int = 0
     is_running: bool = False

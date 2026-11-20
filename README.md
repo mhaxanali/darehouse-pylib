@@ -1,5 +1,6 @@
 # Darehouse - Python Library
-Utility files and game engines for my Fun and Games Discord Bot: [Darehouse](https://github.com/mhaxanali/darehouse)
+Originally designed to contain utility files and game engines for my Fun and Games Discord Bot: [Darehouse](https://github.com/mhaxanali/darehouse) \
+Now a collection of reusable Game Engines that can be paired with any frontend.
 
 PyPI Project: https://pypi.org/project/darehouse \
 Github Repository: https://github.com/mhaxanali/darehouse-pylib
@@ -21,7 +22,7 @@ pip install darehouse
 ```
 ## Documentation
 Project structure is documented @ [PROJECT_STRUCTURE.md](https://github.com/mhaxanali/darehouse-pylib/blob/main/PROJECT_STRUCTURE.md) \
-For further and in-detail documentation for usage, check the `docs/` directory. \
+For further and in-detail documentation for usage, check the `docs/` directory.
 
 ## Author
 [Muhammad Hasan](https://github.com/mhaxanali)

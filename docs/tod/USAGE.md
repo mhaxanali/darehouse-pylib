@@ -143,8 +143,6 @@ engine.remove_player(player2)
 
 Attempting to remove a player who is not in the lobby raises `PlayerDoesNotExist`.
 
-Removing a player when fewer than two players remain raises `InsufficientPlayers`.
-
 Player management is not restricted to the pre-game phase. Players may be added or removed while the game is running.
 
 ## 5. Starting the Game
@@ -207,6 +205,8 @@ Player 1 -> Player 2 -> Player 3 -> Player 1
 ```
 
 Attempting to advance a turn while the game is not running raises `GameNotRunning`.
+
+Attempting to advance a turn while there is no player in the lobby raises `InsufficientPlayers`.
 
 ## 8. Getting Prompts
 

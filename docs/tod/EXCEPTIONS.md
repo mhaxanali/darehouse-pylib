@@ -86,7 +86,7 @@ Raised when an operation requires a minimum number of players, but the current l
 
 **Common causes:**
 - Attempting to start a game with an empty lobby.
-- Attempting to remove a player when fewer than two players remain.
+- Attempting to advance turns with an empty lobby.
 
 ## Handling Exceptions
 

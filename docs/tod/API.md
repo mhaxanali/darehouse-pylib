@@ -299,7 +299,6 @@ Players may be removed before or during a running game.
 
 - `GameDoesNotExist` — If no lobby exists.
 - `PlayerDoesNotExist` — If the player is not present.
-- `InsufficientPlayers` — If fewer than two players remain in the lobby.
 
 ---
 
@@ -369,6 +368,7 @@ When the end of the player list is reached, the index wraps around to the beginn
 
 - `GameDoesNotExist` — If no lobby exists.
 - `GameNotRunning` — If the game is not running.
+- `InsufficientPlayers` — If no remain in the lobby.
 
 ### Behavior
 

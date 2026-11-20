@@ -1,4 +1,3 @@
-
 from .models import *
 from .protocols import *
 from .exceptions import *
@@ -90,7 +89,7 @@ class TODEngine:
         Raises:
             GameAlreadyExists: If a lobby already exists.
         """
-        if self.game:
+        if self.game is not None:
             raise GameAlreadyExists("A lobby already exists.")
 
         self.game = GameState()
@@ -99,6 +98,8 @@ class TODEngine:
         """Add a player to the current lobby.
 
         Players may be added before or during a running game.
+        A player added during a running game joins at the end of
+        the player order.
 
         Args:
             player: The player to add.
@@ -121,13 +122,25 @@ class TODEngine:
 
         Players may be removed before or during a running game.
 
+        While the game is running, the current player index is
+        adjusted so that the next call to advance_turn moves to
+        the player who would have followed in the original order,
+        regardless of who was removed:
+
+        - Removing a player before the current player shifts the
+          list, so the index is moved back to keep pointing at
+          the same player.
+        - Removing the current player moves the index back one
+          position, so the next advance_turn lands on their
+          successor (wrapping to the end of the list if needed).
+        - If no players remain, the index is reset to zero.
+
         Args:
             player: The player to remove.
 
         Raises:
             GameDoesNotExist: If no lobby exists.
             PlayerDoesNotExist: If the player is not present.
-            InsufficientPlayers: If fewer than two players remain.
         """
         self.check_game()
 
@@ -136,13 +149,23 @@ class TODEngine:
                 "The player is not in the game."
             )
 
-        if len(self.game.players) < 2:
-            raise InsufficientPlayers(
-                "There must be at least two players "
-                "in order to remove one."
-            )
-
+        removed_index = self.game.players.index(player)
         self.game.players.remove(player)
+
+        if not self.game.is_running:
+            return
+
+        if not self.game.players:
+            self.game.current_player_index = 0
+            return
+
+        if removed_index <= self.game.current_player_index:
+            self.game.current_player_index -= 1
+
+            if self.game.current_player_index < 0:
+                self.game.current_player_index = (
+                    len(self.game.players) - 1
+                )
 
     def start_game(self):
         """Start the current game.
@@ -167,6 +190,7 @@ class TODEngine:
             )
 
         random.shuffle(self.game.players)
+        self.game.current_player_index = 0
         self.game.is_running = True
 
     def advance_turn(self):
@@ -179,6 +203,8 @@ class TODEngine:
         Raises:
             GameDoesNotExist: If no lobby exists.
             GameNotRunning: If the game is not running.
+            InsufficientPlayers: If there are no players to
+                advance between.
         """
         self.check_game()
 
@@ -187,10 +213,14 @@ class TODEngine:
                 "The game you're trying to advance doesn't exist."
             )
 
-        if self.game.current_player_index == len(self.game.players) - 1:
-            self.game.current_player_index = 0
-        else:
-            self.game.current_player_index += 1
+        if not self.game.players:
+            raise InsufficientPlayers(
+                "Cannot advance the turn with zero players."
+            )
+
+        self.game.current_player_index = (
+            self.game.current_player_index + 1
+        ) % len(self.game.players)
 
     def end_game(self):
         """End the current game and discard its game state.

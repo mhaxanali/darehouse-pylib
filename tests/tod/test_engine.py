@@ -101,6 +101,7 @@ def test_create_lobby(engine):
     assert engine.game is not None
     assert engine.game.is_running is False
     assert engine.game.players == []
+    assert engine.game.current_player_index == 0
 
 
 def test_create_lobby_twice(lobby):
@@ -180,18 +181,32 @@ def test_remove_nonexistent_player(lobby):
         lobby.remove_player(Player(id=3))
 
 
-def test_remove_player_with_insufficient_players(lobby):
-    player = Player(id=1)
-
-    lobby.add_player(player)
-
-    with pytest.raises(InsufficientPlayers):
-        lobby.remove_player(player)
-
-
 def test_remove_player_from_empty_lobby(lobby):
     with pytest.raises(PlayerDoesNotExist):
         lobby.remove_player(Player(id=1))
+
+
+def test_remove_last_player(lobby):
+    player = Player(id=1)
+
+    lobby.add_player(player)
+    lobby.remove_player(player)
+
+    assert lobby.game.players == []
+    assert lobby.game.current_player_index == 0
+
+
+def test_add_player_during_running_game(lobby):
+    player1 = Player(id=1)
+    player2 = Player(id=2)
+
+    lobby.add_player(player1)
+    lobby.start_game()
+
+    lobby.add_player(player2)
+
+    assert player2 in lobby.game.players
+    assert len(lobby.game.players) == 2
 
 
 # ============================================================
@@ -206,11 +221,21 @@ def test_start_game(lobby, players):
     lobby.start_game()
 
     assert lobby.game.is_running is True
+    assert lobby.game.current_player_index == 0
 
 
 def test_start_game_without_players(lobby):
     with pytest.raises(InsufficientPlayers):
         lobby.start_game()
+
+
+def test_start_game_with_one_player(lobby):
+    lobby.add_player(Player(id=1))
+
+    lobby.start_game()
+
+    assert lobby.game.is_running is True
+    assert lobby.game.current_player_index == 0
 
 
 def test_start_game_twice(lobby):
@@ -230,15 +255,25 @@ def test_start_game_shuffles_players(lobby, players):
 
     lobby.start_game()
 
-    # Shuffling should preserve all players.
     assert sorted(
         player.id for player in lobby.game.players
     ) == sorted(
         player.id for player in original_players
     )
 
-    # The game should be running after shuffling.
     assert lobby.game.is_running is True
+    assert lobby.game.current_player_index == 0
+
+
+def test_start_game_resets_current_player_index(lobby, players):
+    for player in players:
+        lobby.add_player(player)
+
+    lobby.game.current_player_index = 2
+
+    lobby.start_game()
+
+    assert lobby.game.current_player_index == 0
 
 
 def test_end_game(lobby):
@@ -289,10 +324,145 @@ def test_advance_turn_wraps_around(lobby, players):
     assert lobby.game.current_player_index == 0
 
 
+def test_advance_turn_with_one_player(lobby):
+    lobby.add_player(Player(id=1))
+
+    lobby.start_game()
+    lobby.advance_turn()
+
+    assert lobby.game.current_player_index == 0
+
+
 def test_advance_turn_without_running_game(lobby):
     lobby.add_player(Player(id=1))
 
     with pytest.raises(GameNotRunning):
+        lobby.advance_turn()
+
+
+def test_advance_turn_with_zero_players(lobby):
+    lobby.game.is_running = True
+
+    with pytest.raises(InsufficientPlayers):
+        lobby.advance_turn()
+
+
+# ============================================================
+# Player removal during a running game
+# ============================================================
+
+
+def test_remove_player_before_current_player(lobby, players):
+    for player in players:
+        lobby.add_player(player)
+
+    lobby.start_game()
+
+    lobby.game.players = players.copy()
+    lobby.game.current_player_index = 2
+
+    lobby.remove_player(players[0])
+
+    assert lobby.game.players == [
+        players[1],
+        players[2],
+    ]
+
+    assert lobby.game.current_player_index == 1
+
+
+def test_remove_current_player(lobby, players):
+    for player in players:
+        lobby.add_player(player)
+
+    lobby.start_game()
+
+    lobby.game.players = players.copy()
+    lobby.game.current_player_index = 1
+
+    lobby.remove_player(players[1])
+
+    assert lobby.game.players == [
+        players[0],
+        players[2],
+    ]
+
+    assert lobby.game.current_player_index == 0
+
+    lobby.advance_turn()
+
+    assert lobby.game.current_player_index == 1
+    assert lobby.game.players[
+        lobby.game.current_player_index
+    ] == players[2]
+
+
+def test_remove_player_after_current_player(lobby, players):
+    for player in players:
+        lobby.add_player(player)
+
+    lobby.start_game()
+
+    lobby.game.players = players.copy()
+    lobby.game.current_player_index = 0
+
+    lobby.remove_player(players[2])
+
+    assert lobby.game.players == [
+        players[0],
+        players[1],
+    ]
+
+    assert lobby.game.current_player_index == 0
+
+
+def test_remove_first_player_wraps_current_index(lobby, players):
+    for player in players:
+        lobby.add_player(player)
+
+    lobby.start_game()
+
+    lobby.game.players = players.copy()
+    lobby.game.current_player_index = 0
+
+    lobby.remove_player(players[0])
+
+    assert lobby.game.players == [
+        players[1],
+        players[2],
+    ]
+
+    assert lobby.game.current_player_index == 1
+
+    lobby.advance_turn()
+
+    assert lobby.game.current_player_index == 0
+
+
+def test_remove_last_player_during_running_game(lobby):
+    player = Player(id=1)
+
+    lobby.add_player(player)
+    lobby.start_game()
+
+    lobby.remove_player(player)
+
+    assert lobby.game.players == []
+    assert lobby.game.current_player_index == 0
+
+
+def test_remove_player_from_running_game_with_one_player(lobby):
+    player = Player(id=1)
+
+    lobby.add_player(player)
+    lobby.start_game()
+
+    lobby.remove_player(player)
+
+    assert lobby.game.players == []
+    assert lobby.game.current_player_index == 0
+
+    with pytest.raises(InsufficientPlayers):
         lobby.advance_turn()
 
 

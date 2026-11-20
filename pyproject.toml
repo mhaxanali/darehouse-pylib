@@ -11,12 +11,15 @@ requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "mhaxanali"}]
 
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0"
 ]
 
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent"
-]
+[tool.setuptools.packages.find]
+where = ["src"]
